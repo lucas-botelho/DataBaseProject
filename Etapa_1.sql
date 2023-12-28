@@ -1,9 +1,12 @@
+create database tfc
+
 use TFC
 
 CREATE TABLE Curso (
     id bigint(20) NOT NULL,
     nome varchar(255) NOT NULL
 );
+
 
 CREATE TABLE Tecnologia (
     id bigint(20) NOT NULL,
@@ -135,4 +138,102 @@ CREATE TABLE TFC (
     semestre int,
     tecnologias varchar(255)
 );
+
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Aluno.csv'
+INTO TABLE Aluno
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/AvaliacaoDisciplinaAluno.csv'
+INTO TABLE AvaliacaoDisciplinaAluno
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Curso.csv'
+INTO TABLE Curso
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Disciplina.csv'
+INTO TABLE Disciplina
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Empresa_EntidadeExterna.csv'
+INTO TABLE Empresa_EntidadeExterna
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Grupo.csv'
+INTO TABLE Grupo
+FIELDS TERMINATED BY ';' 
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/HistoricoTFC.csv'
+INTO TABLE HistoricoTFC
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+
+
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/ProfessorDEISI.csv'
+INTO TABLE ProfessorDEISI
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/ProfessorNDEISI.csv'
+INTO TABLE ProfessorNDEISI
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Tecnologia.csv'
+INTO TABLE tecnologia 
+FIELDS TERMINATED BY ';' 
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/TFCCurso.csv'
+INTO TABLE TFCCurso
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+
+-- estes loads falham
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/Inscricao.csv'
+INTO TABLE Inscricao
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+LOAD DATA INFILE 'E:/Lusofona/Semestre 3/Bases de Dados/Projeto Final/[EI-IG-23.BD]dados/TFC.csv'
+INTO TABLE TFC
+FIELDS TERMINATED BY ';' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 lines
+
+
+
+
+
+
 
