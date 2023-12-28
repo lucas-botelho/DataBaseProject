@@ -1,0 +1,2 @@
+criar tabelas
+mover os ficheiros para C:\Program Files\MariaDB 11.2\lib\files
