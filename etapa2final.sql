@@ -350,8 +350,8 @@ BEGIN TRANSACTION ExclusaoTFCSemCorrespondencia;
 COMMIT TRANSACTION ExclusaoTFCSemCorrespondencia;
 
 ALTER TABLE TFC
-ADD CONSTRAINT FK_TFC_Coordenador
-FOREIGN KEY (coorientador) REFERENCES ProfessorDEISI(numeroProfessor);
+ADD CONSTRAINT FK_TFC_orientador
+FOREIGN KEY (orientador) REFERENCES ProfessorDEISI(numeroProfessor);
 
 -- entidades que nao existem
 SELECT TFC.entidade AS entidade
@@ -488,6 +488,17 @@ ALTER TABLE Inscricao
 ADD CONSTRAINT FK_Inscricao_idtfc FOREIGN KEY (idTFC)
 REFERENCES TFC (idTFC);
 
+--erro, podem ser qualquer tipo de pessoa, professor, empregado, aluno
+/*
+ALTER TABLE TFC
+ADD CONSTRAINT FK_TFC_preponente FOREIGN KEY (preponente)
+REFERENCES Aluno (numeroAluno);
+*/
+SELECT T.preponente
+FROM TFC T
+LEFT JOIN Aluno A ON T.preponente = A.numeroAluno
+WHERE T.preponente IS NOT NULL
+      AND A.numeroAluno IS NULL;
 
 
 /*
