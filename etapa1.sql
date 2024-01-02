@@ -826,7 +826,7 @@ COMMIT TRANSACTION RemoveDuplicatesGrupo
 --ROLLBACK TRANSACTION RemoveDuplicatesGrupo
 
 --drop tabela temporaria
---DROP TABLE TempDuplicadosGrupo;
+DROP TABLE TempDuplicadosGrupo;
 
 -- 5.3 
 -- Tabelas afetadas pelo idTFC
@@ -858,7 +858,7 @@ SELECT count(*) FROM TFCTecnologia WHERE idTFC NOT IN (SELECT id FROM TFC);
 SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 -- Valida HistoricoTFC
 SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
--- Se chegou até aqui sem erros, faz o COMMIT
+
 COMMIT TRANSACTION VerificarCoerencia;
 
 -- numeroProfessor
