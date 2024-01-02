@@ -1,217 +1,541 @@
---Lucas Botelho a22201202
---Tiago Mota a22207337
---Marcos Gil a22102606
---Gonçalo Neves a22204044
+-- <> create database <>
+-------------------------
+IF NOT EXISTS (SELECT name  FROM master.dbo.sysdatabases WHERE name = 'tfc')
+BEGIN
+    CREATE DATABASE tfc;
+END;
+GO
 
-create database tfc
+USE tfc;
 
-use tfc
---1 criar tabelas
---Curso
-CREATE TABLE Curso (
-    id bigint NOT NULL,
-    nome varchar(255) NOT NULL
-);
+-- <> create tables <> --
+-------------------------
+---- curso
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Curso')
+BEGIN
+	CREATE TABLE Curso (
+		id BIGINT NULL,
+		nome VARCHAR(255) NULL);
+END;
+---- tecnologia
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Tecnologia')
+BEGIN
+	CREATE TABLE Tecnologia (
+		id BIGINT NULL,
+		nome VARCHAR(255) NULL);
+END;
+---- disciplina
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Disciplina')
+BEGIN
+	CREATE TABLE Disciplina (
+		id BIGINT NULL,
+		cursoAssociado BIGINT NULL,
+		nome VARCHAR(255) NULL);
+END;
+---- aluno
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Aluno')
+BEGIN
+	CREATE TABLE Aluno (
+		id BIGINT NULL,
+		curso VARCHAR(255) NULL,
+		email VARCHAR(255) NULL,
+		nome VARCHAR(255) NULL,
+		numeroAluno VARCHAR(255) NULL,
+		numeroContato INT NULL);
+END;
+---- avaliacao-disciplina-aluno
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'AvaliacaoDisciplinaAluno')
+BEGIN
+	CREATE TABLE AvaliacaoDisciplinaAluno (
+		id BIGINT NULL,
+		idNumeroAluno BIGINT NULL,
+		idNumeroDisciplina BIGINT NULL,
+		nota INT NULL);
+END;
+---- grupo
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Grupo')
+BEGIN
+	CREATE TABLE Grupo (
+		id BIGINT NULL,
+		confirmaAluno1 TINYINT NULL,
+		confirmaAluno2 TINYINT NULL,
+		idNumeroAluno1 VARCHAR(255) NULL,
+		idNumeroAluno2 VARCHAR(255) NULL);
+END;
+---- utilizador
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Utilizador')
+BEGIN
+	CREATE TABLE Utilizador (
+		id BIGINT NULL,
+		coordenador TINYINT NULL,
+		idIdentificacao VARCHAR(255) NULL,
+		tipoUtilizador VARCHAR(255) NULL);
+END;
+---- inscricao
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Inscricao')
+BEGIN
+	CREATE TABLE Inscricao (
+		id BIGINT NULL,
+		estado VARCHAR(255) NULL,
+		idNumeroGrupo BIGINT NULL,
+		idTFC VARCHAR(255) NULL,
+		numeroAluno VARCHAR(255) NULL,
+		ordemEscolha INT NULL,
+		registoDeInscricao DATETIME NULL,
+		publicado TINYINT NULL,
+		anoLetivo VARCHAR(255) NULL);
+END;
+---- professor-deisi
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'ProfessorDEISI')
+BEGIN
+	CREATE TABLE ProfessorDEISI (
+		id BIGINT NULL,
+		email VARCHAR(255) NULL,
+		nome VARCHAR(255) NULL,
+		numeroContato INT NULL,
+		numeroProfessor VARCHAR(255) NULL);
+END;
+---- professor-n-deisi
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'ProfessorNDEISI')
+BEGIN
+	CREATE TABLE ProfessorNDEISI (
+		id BIGINT NULL,
+		departamentoAfeto VARCHAR(255) NULL,
+		email VARCHAR(255) NULL,
+		idProfessor VARCHAR(255) NULL,
+		nome VARCHAR(255) NULL,
+		numeroContato INT NULL);
+END;
+---- empresa-entidade-externa
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Empresa_EntidadeExterna')
+BEGIN
+	CREATE TABLE Empresa_EntidadeExterna (
+		id BIGINT NULL,
+		email VARCHAR(255) NULL,
+		idEmpresa VARCHAR(255) NULL,
+		interlocutor VARCHAR(255) NULL,
+		morada VARCHAR(255) NULL,
+		nome VARCHAR(255) NULL,
+		numeroContato INT NULL);
+END;
+---- tfc
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TFC')
+BEGIN
+	CREATE TABLE TFC (
+		id BIGINT NULL,
+		titulo VARCHAR(255) NULL,
+		anoletivo VARCHAR(255) NULL,
+		avaliacaoProposta VARCHAR(255) NULL,
+		coorientador VARCHAR(255) NULL,
+		dataEstado VARCHAR(255) NULL,
+		dataProposta VARCHAR(255) NULL,
+		descricao TEXT NULL,
+		entidade BIGINT NULL,
+		estado VARCHAR(255) NULL,
+		idGrupo BIGINT NULL,
+		idtfc VARCHAR(255) NULL,
+		motivoRecusa VARCHAR(255) NULL,
+		numeroInscricoes INT NULL,
+		orientador VARCHAR(255) NULL,
+		orientadorProposto VARCHAR(255) NULL,
+		preponente VARCHAR(255) NULL,
+		semestre INT NULL,
+		tecnologias VARCHAR(255) NULL);
+END;
+---- tfc-curso
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TFCCurso')
+BEGIN
+	CREATE TABLE TFCCurso (
+		id BIGINT NULL,
+		idCurso BIGINT NULL,
+		idTFC BIGINT NULL);
+END;
+---- tfc-tecnologia
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TFCTecnologia')
+BEGIN
+	CREATE TABLE TFCTecnologia (
+		id BIGINT NULL,
+		idTFC BIGINT NULL,
+		idTecnologia BIGINT NULL);
+END;
+---- tfc-disciplina
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TFCDisciplina')
+BEGIN
+	CREATE TABLE TFCDisciplina (
+		id BIGINT NULL,
+		idNumeroDisciplina BIGINT NULL,
+		numeroTFC BIGINT NULL);
+END;
+---- historico-tfc
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'HistoricoTFC')
+BEGIN
+	CREATE TABLE HistoricoTFC (
+		id BIGINT NULL,
+		avaliacao VARCHAR(255) NULL,
+		dataMudancaEstado VARCHAR(255) NULL,
+		estado VARCHAR(255) NULL,
+		idTFC VARCHAR(255) NULL,
+		idTFCNumerico BIGINT NULL,
+		utilizador VARCHAR(255) NULL);
+END;
 
---Tecnologia
-CREATE TABLE Tecnologia (
-    id bigint NOT NULL,
-    nome varchar(255) --tem de ser NOT NULL
-);
+GO
 
-select * from Tecnologia
-select count(*) from Tecnologia --152
-DELETE FROM Tecnologia WHERE nome IS NULL; --apagar os que vieram a null da importacao de dados
-select count(*) from Tecnologia --151
-ALTER TABLE Tecnologia ALTER COLUMN nome VARCHAR(255) NOT NULL; --meter nome a nao aceitar nulls tal como no modelo de dados
---validar se ficou com o campo a not null
-SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Tecnologia' AND COLUMN_NAME = 'nome';
+-- limpar BD
 
+--curso
+select count(*) from Curso WHERE id IS NULL or nome IS NULL; 
+DELETE FROM Curso WHERE nome IS NULL or id IS NULL;
+select count(*) from Curso WHERE id IS NULL or nome IS NULL; 
+--tecnologia
+select count(*) from Tecnologia WHERE id IS NULL or nome IS NULL; 
+DELETE FROM Tecnologia WHERE nome IS NULL or id IS NULL;
+select count(*) from Tecnologia WHERE id IS NULL or nome IS NULL; 
 --disciplina
-CREATE TABLE Disciplina (
-    id bigint NOT NULL,
-    cursoAssociado bigint NOT NULL,
-    nome varchar(255) NOT NULL
-);
-
-CREATE TABLE TFCCurso (
-    id bigint NOT NULL,
-    idCurso bigint NOT NULL,
-    idTFC bigint NOT NULL
-);
-
-
-CREATE TABLE TFCTecnologia (
-    id bigint NOT NULL,
-    idTFC bigint NOT NULL,
-    idTecnologia bigint NOT NULL
-);
-
-CREATE TABLE TFCDisciplina (
-    id bigint NOT NULL,
-    idNumeroDisciplina bigint NOT NULL,
-    numeroTFC bigint NOT NULL
-);
-
-CREATE TABLE AvaliacaoDisciplinaAluno (
-    id bigint NOT NULL,
-    idNumeroAluno bigint NOT NULL,
-    idNumeroDisciplina bigint NOT NULL,
-    nota int NOT NULL
-);
-
-CREATE TABLE Aluno (
-    id bigint NOT NULL,
-    curso varchar(255),
-    email varchar(255),
-    nome varchar(255) NOT NULL,
-    numeroAluno varchar(255) NOT NULL,
-    numeroContato int
-);
-
-CREATE TABLE Grupo (
-    id bigint NOT NULL,
-    confirmaAluno1 tinyint NOT NULL,
-    confirmaAluno2 tinyint,
-    idNumeroAluno1 varchar(255) NOT NULL,
-    idNumeroAluno2 varchar(255)
-);
-
-CREATE TABLE HistoricoTFC (
-    id bigint NOT NULL,
-    avaliacao varchar(255),
-    dataMudancaEstado varchar(255),
-    estado varchar(255) NOT NULL,
-    idTFC varchar(255) NOT NULL,
-    idTFCNumerico bigint NOT NULL,
-    utilizador varchar(255) NOT NULL
-);
-
-CREATE TABLE Inscricao (
-    id bigint NOT NULL,
-    estado varchar(255),
-    idNumeroGrupo bigint NOT NULL,
-    idTFC varchar(255) NOT NULL,
-    numeroAluno varchar(255),
-    ordemEscolha int,
-    registoDeInscricao datetime,
-    publicado tinyint,
-    anoLetivo varchar(255)
-);
+select count(*) from Disciplina WHERE id IS NULL or cursoAssociado is null or nome IS NULL; 
+DELETE FROM Disciplina WHERE id IS NULL or cursoAssociado is null or nome IS NULL; 
+select count(*) from Disciplina WHERE id IS NULL or cursoAssociado is null or nome IS NULL; 
+--aluno
+select count(*) from Aluno WHERE id IS NULL or nome is null or numeroAluno IS NULL; 
+DELETE FROM Aluno WHERE id IS NULL or nome is null or numeroAluno IS NULL; 
+select count(*) from Aluno WHERE id IS NULL or nome is null or numeroAluno IS NULL; 
+--avaliacaodisciplinaaluno
+select count(*) from AvaliacaoDisciplinaAluno WHERE id IS NULL or idNumeroAluno is null or idNumeroDisciplina IS NULL or nota IS NULL; 
+DELETE FROM AvaliacaoDisciplinaAluno WHERE id IS NULL or idNumeroAluno is null or idNumeroDisciplina IS NULL or nota IS NULL; 
+select count(*) from AvaliacaoDisciplinaAluno WHERE id IS NULL or idNumeroAluno is null or idNumeroDisciplina IS NULL or nota IS NULL; 
+--tfcdisciplina
+select count(*) from TFCDisciplina WHERE id IS NULL or idNumeroDisciplina is null or numeroTFC is null; 
+DELETE FROM TFCDisciplina WHERE id IS NULL or idNumeroDisciplina is null or numeroTFC is null; 
+select count(*) from TFCDisciplina WHERE id IS NULL or idNumeroDisciplina is null or numeroTFC is null; 
+--tfctecnologia
+select count(*) from TFCTecnologia WHERE id IS NULL or idTFC is null or idTecnologia is null; 
+DELETE FROM  TFCTecnologia WHERE id IS NULL or idTFC is null or idTecnologia is null; 
+select count(*) from TFCTecnologia WHERE id IS NULL or idTFC is null or idTecnologia is null; 
+--tfccurso
+select count(*) from TFCCurso WHERE id IS NULL or idTFC is null or idCurso is null; 
+DELETE FROM  TFCCurso WHERE id IS NULL or idTFC is null or idCurso is null; 
+select count(*) from TFCCurso WHERE id IS NULL or idTFC is null or idCurso is null; 
+--inscricao
+select count(*) from Inscricao WHERE id IS NULL or idTFC is null;
+DELETE FROM  Inscricao WHERE id IS NULL or idTFC is null;
+select count(*) from Inscricao WHERE id IS NULL or idTFC is null;
+--historicotfc
+select count(*) from HistoricoTFC WHERE id IS NULL or idTFC is null OR estado is null or idTFCNumerico IS NULL OR utilizador IS NULL;
+DELETE FROM  HistoricoTFC WHERE id IS NULL or idTFC is null OR estado is null or idTFCNumerico IS NULL OR utilizador IS NULL;
+select count(*) from HistoricoTFC WHERE id IS NULL or idTFC is null OR estado is null or idTFCNumerico IS NULL OR utilizador IS NULL;
+--grupo
+select count(*) from Grupo WHERE id IS NULL or confirmaAluno1 is null OR idNumeroAluno1 is null;
+DELETE FROM Grupo WHERE id IS NULL or confirmaAluno1 is null OR idNumeroAluno1 is null;
+select count(*) from Grupo WHERE id IS NULL or confirmaAluno1 is null OR idNumeroAluno1 is null;
+--tfc
+select count(*) from TFC WHERE id IS NULL ;
+DELETE FROM TFC WHERE id IS NULL ;
+select count(*) from  TFC WHERE id IS NULL ;
+--professorndeisi
+select count(*) from ProfessorNDEISI WHERE id IS NULL or departamentoAfeto IS NULL or email  IS NULL or numeroContato IS NULL or nome IS NULL;
+DELETE FROM ProfessorNDEISI WHERE id IS NULL or departamentoAfeto IS NULL or email  IS NULL or numeroContato IS NULL or nome IS NULL;
+select count(*) from ProfessorNDEISI WHERE id IS NULL or departamentoAfeto IS NULL or email  IS NULL or numeroContato IS NULL or nome IS NULL;
+--professordeisi
+select count(*) from ProfessorDEISI WHERE id IS NULL or nome IS NULL or numeroProfessor  IS NULL ;
+DELETE FROM ProfessorDEISI WHERE id IS NULL or nome IS NULL or numeroProfessor  IS NULL ;
+select count(*) from ProfessorDEISI WHERE id IS NULL or nome IS NULL or numeroProfessor  IS NULL ;
+--empresa
+select count(*) from Empresa_EntidadeExterna WHERE id IS NULL or nome IS NULL ;
+DELETE FROM Empresa_EntidadeExterna WHERE id IS NULL or nome IS NULL ;
+select count(*) from Empresa_EntidadeExterna WHERE id IS NULL or nome IS NULL ;
+--utilizador
+select count(*) from Utilizador WHERE id IS NULL ;
+DELETE FROM Utilizador WHERE id IS NULL;
+select count(*) from Utilizador WHERE id IS NULL ;
 
 
-CREATE TABLE ProfessorNDEISI (
-    id bigint NOT NULL,
-    departamentoAfeto varchar(255) NOT NULL,
-    email varchar(255) NOT NULL,
-    idProfessor varchar(255),
-    nome varchar(255) NOT NULL,
-    numeroContato int NOT NULL
-);
+--alter tables para meter not nulls
+BEGIN TRY
+    BEGIN TRANSACTION;
+		ALTER TABLE Curso ALTER COLUMN id bigint NOT NULL;
+		ALTER TABLE Curso ALTER COLUMN nome VARCHAR(255) NOT NULL;
 
-CREATE TABLE Empresa_EntidadeExterna (
-    id bigint NOT NULL,
-    email varchar(255),
-    idEmpresa varchar(255),
-    interlocutor varchar(255),
-    morada varchar(255),
-    nome varchar(255), --tem de ser NOT NULL
-    numeroContato int
-);
+		ALTER TABLE Tecnologia ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Tecnologia ALTER COLUMN nome VARCHAR(255) NOT NULL;
 
---mesmo processo aplicado a table Tecnologia
-select * from Empresa_EntidadeExterna
-select count(*) from Empresa_EntidadeExterna --96
-select count(*) from Empresa_EntidadeExterna where nome is null --1
+		ALTER TABLE Disciplina ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Disciplina ALTER COLUMN cursoAssociado BIGINT NOT NULL;
+		ALTER TABLE Disciplina ALTER COLUMN nome VARCHAR(255) NOT NULL;
 
-DELETE FROM Empresa_EntidadeExterna WHERE nome IS NULL;
+		ALTER TABLE Aluno ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Aluno ALTER COLUMN nome VARCHAR(255) NOT NULL;
+		ALTER TABLE Aluno ALTER COLUMN numeroAluno varchar(255) NOT NULL;
 
-select count(*) from Empresa_EntidadeExterna where nome is null --0
+		ALTER TABLE AvaliacaoDisciplinaAluno ALTER COLUMN id bigint NOT NULL;
+		ALTER TABLE AvaliacaoDisciplinaAluno ALTER COLUMN idNumeroAluno bigint NOT NULL;
+		ALTER TABLE AvaliacaoDisciplinaAluno ALTER COLUMN idNumeroDisciplina bigint NOT NULL;
+		ALTER TABLE AvaliacaoDisciplinaAluno ALTER COLUMN nota int NOT NULL;
 
-ALTER TABLE Empresa_EntidadeExterna ALTER COLUMN nome VARCHAR(255) NOT NULL;
+		--tfcdisciplina
+		ALTER TABLE TFCDisciplina ALTER COLUMN id bigint NOT NULL;
+		ALTER TABLE TFCDisciplina ALTER COLUMN idNumeroDisciplina bigint NOT NULL;
+		ALTER TABLE TFCDisciplina ALTER COLUMN numeroTFC bigint NOT NULL;
 
-SELECT IS_NULLABLE
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = 'Empresa_EntidadeExterna' AND COLUMN_NAME = 'nome';
+		--tfctecnologia
+		ALTER TABLE TFCTecnologia ALTER COLUMN id bigint NOT NULL;
+		ALTER TABLE TFCTecnologia ALTER COLUMN idTFC bigint NOT NULL;
+		ALTER TABLE TFCTecnologia ALTER COLUMN idTecnologia bigint NOT NULL;
 
-CREATE TABLE ProfessorDEISI (
-    id bigint NOT NULL,
-    email varchar(255),
-    nome varchar(255) NOT NULL,
-    numeroContato int,
-    numeroProfessor varchar(255) NOT NULL
-);
+		--tfccurso
+		ALTER TABLE TFCCurso ALTER COLUMN id bigint NOT NULL;
+		ALTER TABLE TFCCurso ALTER COLUMN idTFC bigint NOT NULL;
+		ALTER TABLE TFCCurso ALTER COLUMN idCurso bigint NOT NULL;
 
-CREATE TABLE Utilizador (
-    id bigint NOT NULL,
-    coordenador tinyint,
-    idIdentificacao varchar(255),
-    tipoUtilizador varchar(255)
-);
+		ALTER TABLE Utilizador ALTER COLUMN id bigint NOT NULL;
 
+		ALTER TABLE Inscricao ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Inscricao ALTER COLUMN idTFC varchar(255) NOT NULL;
 
-CREATE TABLE TFC (
-    id bigint NOT NULL,
-    titulo varchar(255),
-    anoletivo varchar(255),
-    avaliacaoProposta varchar(255),
-    coorientador varchar(255),
-    dataEstado varchar(255),
-    dataProposta varchar(255),
-    descricao text,
-    entidade bigint ,
-    estado varchar(255),
-    idGrupo bigint,
-    idtfc varchar(255),
-    motivoRecusa varchar(255),
-    numeroInscricoes int,
-    orientador varchar(255),
-    orientadorProposto varchar(255),
-    preponente varchar(255),
-    semestre int,
-    tecnologias varchar(255)
-);
+		ALTER TABLE HistoricoTFC ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE HistoricoTFC ALTER COLUMN idTFC VARCHAR(255) NOT NULL;
+		ALTER TABLE HistoricoTFC ALTER COLUMN estado VARCHAR(255) NOT NULL;
+		ALTER TABLE HistoricoTFC ALTER COLUMN idTFCNumerico BIGINT NOT NULL;
+		ALTER TABLE HistoricoTFC ALTER COLUMN utilizador VARCHAR(255) NOT NULL;
 
+		ALTER TABLE Grupo ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Grupo ALTER COLUMN confirmaAluno1 TINYINT NOT NULL;
+		ALTER TABLE Grupo ALTER COLUMN idNumeroAluno1 VARCHAR(255) NOT NULL;
+
+		ALTER TABLE TFC ALTER COLUMN id BIGINT NOT NULL;
+
+		ALTER TABLE ProfessorNDEISI ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE ProfessorNDEISI ALTER COLUMN departamentoAfeto VARCHAR(255) NOT NULL;
+		ALTER TABLE ProfessorNDEISI ALTER COLUMN email VARCHAR(255) NOT NULL;
+		ALTER TABLE ProfessorNDEISI ALTER COLUMN nome VARCHAR(255) NOT NULL;
+		ALTER TABLE ProfessorNDEISI ALTER COLUMN numeroContato INT NOT NULL;
+
+		ALTER TABLE ProfessorDEISI ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE ProfessorDEISI ALTER COLUMN nome VARCHAR(255) NOT NULL;
+		ALTER TABLE ProfessorDEISI ALTER COLUMN numeroProfessor VARCHAR(255) NOT NULL;
+
+		ALTER TABLE Empresa_EntidadeExterna ALTER COLUMN id BIGINT NOT NULL;
+		ALTER TABLE Empresa_EntidadeExterna ALTER COLUMN nome VARCHAR(255) NOT NULL;
+		COMMIT TRANSACTION; 
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION;
+END CATCH;
+
+GO
 --3 criar indices
-CREATE INDEX index_Curso_id ON Curso(id);
-CREATE INDEX indexTecnologia_id ON Tecnologia(id);
-CREATE INDEX index_Disciplina_id ON Disciplina(id);
-CREATE INDEX index_Disciplina_cursoAssociado ON Disciplina(cursoAssociado);
-CREATE INDEX indexTFCCurso_id ON TFCCurso(id);
-CREATE INDEX indexTFCCurso_idCurso ON TFCCurso(idCurso);
-CREATE INDEX indexTFCTecnologia_id ON TFCTecnologia(id);
-CREATE INDEX indexTFCTecnologia_idTFC ON TFCTecnologia(idTFC);
-CREATE INDEX indexTFCTecnologia_idTecnologia ON TFCTecnologia(idTecnologia);
-CREATE INDEX indexTFCDisciplina_id ON TFCDisciplina(id);
-CREATE INDEX indexTFCDisciplina_idNumeroDisciplina ON TFCDisciplina(idNumeroDisciplina);
-CREATE INDEX indexTFCDisciplina_numeroTFC ON TFCDisciplina(numeroTFC);
-CREATE INDEX index_AvaliacaoDisciplinaAluno_id ON AvaliacaoDisciplinaAluno(id);
-CREATE INDEX index_AvaliacaoDisciplinaAluno_idNumeroAluno ON AvaliacaoDisciplinaAluno(idNumeroAluno);
-CREATE INDEX index_AvaliacaoDisciplinaAluno_idNumeroDisciplina ON AvaliacaoDisciplinaAluno(idNumeroDisciplina);
-CREATE INDEX index_Aluno_id ON Aluno(id);
-CREATE INDEX index_Grupo_id ON Grupo(id);
-CREATE INDEX index_HistoricoTFC_id ON HistoricoTFC(id);
-CREATE INDEX indexInscricao_id ON Inscricao(id);
-CREATE INDEX indexInscricao_idNumeroGrupo ON Inscricao(idNumeroGrupo);
-CREATE INDEX indexProfessoresNDEISI_id ON ProfessorNDEISI(id);
-CREATE INDEX index_Empresa_EntidadeExterna_id ON Empresa_EntidadeExterna(id);
-CREATE INDEX indexProfessoresDEISI_id ON ProfessorDEISI(id);
-CREATE INDEX indexUtilizador_id ON Utilizador(id);
-CREATE INDEX indexTFC_id ON TFC(id);
-CREATE INDEX indexTFC_idGrupo ON TFC(idGrupo);
-CREATE INDEX indexTFC_idtfc ON TFC(idtfc);
 
---4.1/4.2 
-SELECT COUNT(*) AS NomesComEspaco FROM Curso WHERE TRIM(nome) != nome; -- 0
---inserts para testes
-insert into Curso (id, nome) values (999, '   [teste   ')
-insert into Curso (id, nome) values (999, '   " teste] "teste]')
-insert into Curso (id, nome) values (999, '" teste] "teste"')
+---- curso
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_curso_id' AND object_id = OBJECT_ID('Curso') or
+		  name = 'index_curso_nome' AND object_id = OBJECT_ID('Curso')		
+)
+BEGIN
+    CREATE INDEX index_curso_id ON Curso(id);
+	CREATE INDEX index_curso_nome ON Curso(nome);
+END;
+---- tecnologia
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_tecnologia_id' AND object_id = OBJECT_ID('Tecnologia') or
+		  name = 'index_tecnologia_nome' AND object_id = OBJECT_ID('Tecnologia')		
+)
+BEGIN
+    CREATE INDEX index_tecnologia_id ON Tecnologia(id);
+	CREATE INDEX index_tecnologia_nome ON Tecnologia(nome);
+END;
+---- disciplina
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_disciplina_id' AND object_id = OBJECT_ID('Disciplina') or
+		  name = 'index_disciplina_curso_associado' AND object_id = OBJECT_ID('Disciplina')	or
+		  name = 'index_disciplina_nome' AND object_id = OBJECT_ID('Disciplina')
+)
+BEGIN
+    CREATE INDEX index_disciplina_id ON Disciplina(id);
+	CREATE INDEX index_disciplina_curso_associado ON Disciplina(cursoAssociado);
+	CREATE INDEX index_disciplina_nome ON Disciplina(nome);
+END;
+---- tfccurso
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_tfc_curso_id' AND object_id = OBJECT_ID('TFCCurso') or
+		  name = 'index_tfc_curso_idCurso' AND object_id = OBJECT_ID('TFCCurso') or
+		  name = 'index_tfc_curso_idTfc' AND object_id = OBJECT_ID('TFCCurso')
+)
+BEGIN
+    CREATE INDEX index_tfc_curso_id ON TFCCurso(id);
+	CREATE INDEX index_tfc_curso_idCurso ON TFCCurso(idCurso);
+	CREATE INDEX index_tfc_curso_idTfc ON TFCCurso(idTFC);
+END;
+---- tfctecnologia
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_tfc_tecnologia_id' AND object_id = OBJECT_ID('TFCTecnologia') or
+		  name = 'index_tfc_tecnologia_idTFC' AND object_id = OBJECT_ID('TFCTecnologia') or
+		  name = 'index_tfc_tecnologia_idTecnologia' AND object_id = OBJECT_ID('TFCTecnologia')
+)
+BEGIN
+    CREATE INDEX index_tfc_tecnologia_id ON TFCTecnologia(id);
+	CREATE INDEX index_tfc_tecnologia_idTFC ON TFCTecnologia(idTFC);
+	CREATE INDEX index_tfc_tecnologia_idTecnologia ON TFCTecnologia(idTecnologia);
+END;
+---- tfcdisciplina
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_tfc_disciplina_id' AND object_id = OBJECT_ID('TFCDisciplina') or
+		  name = 'index_tfc_disciplina_idNumeroDisciplina' AND object_id = OBJECT_ID('TFCDisciplina') or
+		  name = 'index_tfc_disciplina_numeroTFC' AND object_id = OBJECT_ID('TFCDisciplina')
+)
+BEGIN
+    CREATE INDEX index_tfc_disciplina_id ON TFCDisciplina(id);
+	CREATE INDEX index_tfc_disciplina_idNumeroDisciplina ON TFCDisciplina(idNumeroDisciplina);
+	CREATE INDEX index_tfc_disciplina_numeroTFC ON TFCDisciplina(numeroTFC);
+END;
+---- avalicao disciplina aluno
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_avaliacao_disciplina_aluno_id' AND object_id = OBJECT_ID('AvaliacaoDisciplinaAluno') or
+		  name = 'index_avaliacao_disciplina_aluno_idNumeroAluno' AND object_id = OBJECT_ID('AvaliacaoDisciplinaAluno') or
+		  name = 'index_avaliacao_disciplina_aluno_idNumeroDisciplina' AND object_id = OBJECT_ID('AvaliacaoDisciplinaAluno') or
+		  name = 'index_avaliacao_disciplina_aluno_nota' AND object_id = OBJECT_ID('AvaliacaoDisciplinaAluno')
+)
+BEGIN
+    CREATE INDEX index_avaliacao_disciplina_aluno_id ON AvaliacaoDisciplinaAluno(id);
+	CREATE INDEX index_avaliacao_disciplina_aluno_idNumeroAluno ON AvaliacaoDisciplinaAluno(idNumeroAluno);
+	CREATE INDEX index_avaliacao_disciplina_aluno_idNumeroDisciplina ON AvaliacaoDisciplinaAluno(idNumeroDisciplina);
+	CREATE INDEX index_avaliacao_disciplina_aluno_nota ON AvaliacaoDisciplinaAluno(nota);
+END;
+---- aluno
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_aluno_id' AND object_id = OBJECT_ID('Aluno') or
+		  name = 'index_aluno_nome' AND object_id = OBJECT_ID('Aluno') or
+		  name = 'index_aluno_numeroAluno' AND object_id = OBJECT_ID('Aluno')
+)
+BEGIN
+    CREATE INDEX index_aluno_id ON Aluno(id);
+	CREATE INDEX index_aluno_nome ON Aluno(nome);
+	CREATE INDEX index_aluno_numeroAluno ON Aluno(numeroAluno);
+END;
+---- inscricao
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_inscricao_id' AND object_id = OBJECT_ID('Inscricao') or
+		  name = 'index_inscricao_idTFC' AND object_id = OBJECT_ID('Inscricao')
+)
+BEGIN
+    CREATE INDEX index_inscricao_id ON Inscricao(id);
+	CREATE INDEX index_inscricao_idTFC ON Inscricao(idTFC);
+END;
+---- historico tfc
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_historico_tfc_id' AND object_id = OBJECT_ID('HistoricoTFC') or
+		  name = 'index_historico_tfc_estado' AND object_id = OBJECT_ID('HistoricoTFC') or
+		  name = 'index_historico_tfc_idTFC' AND object_id = OBJECT_ID('HistoricoTFC') or
+		  name = 'index_historico_tfc_idTFCNumerico' AND object_id = OBJECT_ID('HistoricoTFC') or
+		  name = 'index_historico_tfc_utilizador' AND object_id = OBJECT_ID('HistoricoTFC')
+)
+BEGIN
+    CREATE INDEX index_historico_tfc_id ON HistoricoTFC(id);
+	CREATE INDEX index_historico_tfc_estado ON HistoricoTFC(estado);
+	CREATE INDEX index_historico_tfc_idTFC ON HistoricoTFC(idTFC);
+	CREATE INDEX index_historico_tfc_idTFCNumerico ON HistoricoTFC(idTFCNumerico);
+	CREATE INDEX index_historico_tfc_utilizador ON HistoricoTFC(utilizador);
+END;
+---- grupo
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_grupo_id' AND object_id = OBJECT_ID('Grupo') or
+		  name = 'index_grupo_confirmaAluno1' AND object_id = OBJECT_ID('Grupo') or
+		  name = 'index_grupo_idNumeroAluno1' AND object_id = OBJECT_ID('Grupo')
+)
+BEGIN
+    CREATE INDEX index_grupo_id ON Grupo(id);
+	CREATE INDEX index_grupo_confirmaAluno1 ON Grupo(confirmaAluno1);
+	CREATE INDEX index_grupo_idNumeroAluno1 ON Grupo(idNumeroAluno1);
+END;
 
-SELECT COUNT(*) AS NumRowsInvalidas FROM Curso WHERE TRIM(BOTH ' ' FROM nome) != nome or  nome LIKE '"%' or nome LIKE '%"' or  nome LIKE '[%' or nome LIKE '%[' or  nome LIKE ']%' or nome LIKE '%]';
-SELECT * FROM Curso WHERE TRIM(BOTH ' ' FROM nome) != nome or  nome LIKE '"%' or nome LIKE '%"' or  nome LIKE '[%' or nome LIKE '%[' or  nome LIKE ']%' or nome LIKE '%]';
-SELECT * FROM Curso
-UPDATE Curso SET nome = LTRIM(RTRIM(REPLACE(REPLACE(REPLACE(nome, '"', ''), '[', ''), ']', '')));
+---- tfc
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_tfc_id' AND object_id = OBJECT_ID('TFC') 
+)
+BEGIN
+    CREATE INDEX index_tfc_id ON TFC(id);
+END;
+
+---- ProfessorNDEISI
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_professorndeisi_id' AND object_id = OBJECT_ID('ProfessorNDEISI')  or
+		  name = 'index_professorndeisi_departamentoafeto' AND object_id = OBJECT_ID('ProfessorNDEISI')  or
+		  name = 'index_professorndeisi_email' AND object_id = OBJECT_ID('ProfessorNDEISI')  or
+		  name = 'index_professorndeisi_nome' AND object_id = OBJECT_ID('ProfessorNDEISI')  or
+		  name = 'index_professorndeisi_numContacto' AND object_id = OBJECT_ID('ProfessorNDEISI') 
+)
+BEGIN
+    CREATE INDEX index_professorndeisi_id ON ProfessorNDEISI(id);
+    CREATE INDEX index_professorndeisi_departamentoafeto ON ProfessorNDEISI(departamentoAfeto);
+    CREATE INDEX index_professorndeisi_email ON ProfessorNDEISI(email);
+    CREATE INDEX index_professorndeisi_nome ON ProfessorNDEISI(nome);
+    CREATE INDEX index_professorndeisi_numContacto ON ProfessorNDEISI(numeroContato);
+END;
+
+---- EntidadeEmpresa
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_EntidadeEmpresa_id' AND object_id = OBJECT_ID('Empresa_EntidadeExterna')  or
+		  name = 'index_EntidadeEmpresa_nome' AND object_id = OBJECT_ID('Empresa_EntidadeExterna')
+)
+BEGIN
+    CREATE INDEX index_EntidadeEmpresa_id ON Empresa_EntidadeExterna(id);
+    CREATE INDEX index_EntidadeEmpresa_nome ON Empresa_EntidadeExterna(nome);
+END;
+
+---- ProfessorDEISI
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_professorndeisi_id' AND object_id = OBJECT_ID('ProfessorDEISI')  or
+		  name = 'index_professorndeisi_nome' AND object_id = OBJECT_ID('ProfessorDEISI')  or
+		  name = 'index_professorndeisi_numProfessor' AND object_id = OBJECT_ID('ProfessorDEISI') 
+)
+BEGIN
+    CREATE INDEX index_professorndeisi_id ON ProfessorDEISI(id);
+    CREATE INDEX index_professorndeisi_email ON ProfessorDEISI(email);
+    CREATE INDEX index_professorndeisi_numProfessor ON ProfessorDEISI(numeroContato);
+END;
+
+---- Utilizador
+IF NOT EXISTS (
+    SELECT *
+    FROM sys.indexes
+    WHERE name = 'index_Utilizador_id' AND object_id = OBJECT_ID('Utilizador')
+)
+BEGIN
+    CREATE INDEX index_Utilizador_id ON Utilizador(id);
+END;
+
+GO
+
+--4.1 e 4.2
 
 --Curso
 --tira espacos brancos
@@ -225,9 +549,6 @@ UPDATE Curso SET nome = LTRIM(RTRIM(REPLACE(REPLACE(REPLACE(nome, '"', ''), '[',
 --Tira ]
  UPDATE Curso SET nome = SUBSTRING(nome, 2, LEN(nome)) WHERE LEFT(nome, 1) = ']';
  UPDATE Curso SET nome = SUBSTRING(nome, 1, LEN(nome)-1) WHERE RIGHT(nome, 1) = ']'
-
---apagar dados de testes
-delete from Curso where id = 999
 
 --Aluno
 --tira espacos brancos
@@ -571,25 +892,24 @@ UPDATE TFC SET tecnologias = SUBSTRING(tecnologias, 1, LEN(tecnologias)-1) WHERE
 SELECT distinct estado FROM Inscricao
 --verificar quais e que sao diferentes dos do enunciado
 SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
---contagem 
+--contagem de errados 628
 SELECT count(estado) FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
+--contagem de certos 633
 SELECT count(estado) FROM Inscricao 
-
 --mapeamento dos estados do enunciados para as colunas incorretas tabela inscricao
 BEGIN TRANSACTION TransactionUpdateEstadoInscricao;
-UPDATE Inscricao SET estado = 'Aguarda Atribuição' WHERE estado = 'A Aguardar Atribuição';
-UPDATE Inscricao SET estado = 'Atribuído' WHERE estado = 'Atribuido';
-UPDATE Inscricao SET estado = 'Não Atribuído' WHERE estado = 'Não Atribuido';
-UPDATE Inscricao SET estado = 'Anulado' WHERE estado IS NULL;
+	UPDATE Inscricao SET estado = 'Aguarda Atribuição' WHERE estado = 'A Aguardar Atribuição';
+	UPDATE Inscricao SET estado = 'Atribuído' WHERE estado = 'Atribuido';
+	UPDATE Inscricao SET estado = 'Não Atribuído' WHERE estado = 'Não Atribuido';
+	UPDATE Inscricao SET estado = 'Anulado' WHERE estado IS NULL;
 
---validacao de que os estados tao certos
-SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
-SELECT distinct estado FROM Inscricao
-
+	--validacao de que os estados tao certos
+	SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
+	SELECT distinct estado FROM Inscricao
 COMMIT TRANSACTION TransactionUpdateEstadoInscricao;
---ROLLBACK TRANSACTION TransactionUpdateEstadoInscricao;
 
-   
+GO
+
 SELECT count(estado) FROM TFC WHERE estado NOT IN ('Aguarda Aprovação', 'Recusado', 'Aguarda Atribuição', 'Atribuído', 'Publicado', 'Indisponível', 'Anulado') OR estado IS NULL;
 SELECT distinct estado FROM TFC WHERE estado NOT IN ('Aguarda Aprovação', 'Recusado', 'Aguarda Atribuição', 'Atribuído', 'Publicado', 'Indisponível', 'Anulado') OR estado IS NULL;
 
@@ -656,26 +976,23 @@ SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS i
 
 --5.2
 
--- TFC
-select count(*)from dbo.TFC --336
--- Inserir registros com idtfc igual para testar
-INSERT INTO TFC VALUES
-(999, 'TFC1', 'Ano1', 'Avaliacao1', 'Coorientador1', '2023-01-01', '2023-01-15', 'Descrição1', 1, 'Estado1', 1, 'IDTFC3', 'Motivo1', 5, 'Orientador1', 'OrientadorProposto1', 'Preponente1', 1, 'Tecnologias1'),
-(999, 'TFC2', 'Ano2', 'Avaliacao2', 'Coorientador2', '2023-02-01', '2023-02-15', 'Descrição2', 2, 'Estado2', 2, 'IDTFC3', 'Motivo2', 7, 'Orientador2', 'OrientadorProposto2', 'Preponente2', 2, 'Tecnologias2'),
-(999, 'TFC3', 'Ano3', 'Avaliacao3', 'Coorientador3', '2023-03-01', '2023-03-15', 'Descrição3', 3, 'Estado3', 3, 'IDTFC3', 'Motivo3', 8, 'Orientador3', 'OrientadorProposto3', 'Preponente3', 1, 'Tecnologias3'),
-(999, 'TFC4', 'Ano4', 'Avaliacao4', 'Coorientador4', '2023-04-01', '2023-04-15', 'Descrição4', 4, 'Estado4', 4, 'IDTFC4', 'Motivo4', 10, 'Orientador4', 'OrientadorProposto4', 'Preponente4', 2, 'Tecnologias4'),
-(999, 'TFC5', 'Ano5', 'Avaliacao5', 'Coorientador5', '2023-05-01', '2023-05-15', 'Descrição5', 5, 'Estado5', 5, 'IDTFC4', 'Motivo5', 12, 'Orientador5', 'OrientadorProposto5', 'Preponente5', 2, 'Tecnologias5');
-
-SELECT idtfc AS NumRepetidos FROM TFC GROUP BY idtfc HAVING COUNT(idtfc) > 1;
-
 -- Adiciona a coluna temporária
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'TFC' AND COLUMN_NAME = 'id_temp')
 BEGIN
     ALTER TABLE TFC
-    ADD id_temp INT;
+    ADD id_temp INT NULL;
 END;
 
-select count(*)from dbo.TFC --341
+GO
+
+INSERT INTO TFC VALUES
+(999, 'TFC1', 'Ano1', 'Avaliacao1', 'Coorientador1', '2023-01-01', '2023-01-15', 'Descrição1', 1, 'Estado1', 1, 'IDTFC3', 'Motivo1', 5, 'Orientador1', 'OrientadorProposto1', 'Preponente1', 1, 'Tecnologias1', NULL),
+(999, 'TFC2', 'Ano2', 'Avaliacao2', 'Coorientador2', '2023-02-01', '2023-02-15', 'Descrição2', 2, 'Estado2', 2, 'IDTFC3', 'Motivo2', 7, 'Orientador2', 'OrientadorProposto2', 'Preponente2', 2, 'Tecnologias2', NULL),
+(999, 'TFC3', 'Ano3', 'Avaliacao3', 'Coorientador3', '2023-03-01', '2023-03-15', 'Descrição3', 3, 'Estado3', 3, 'IDTFC3', 'Motivo3', 8, 'Orientador3', 'OrientadorProposto3', 'Preponente3', 1, 'Tecnologias3', NULL),
+(999, 'TFC4', 'Ano4', 'Avaliacao4', 'Coorientador4', '2023-04-01', '2023-04-15', 'Descrição4', 4, 'Estado4', 4, 'IDTFC4', 'Motivo4', 10, 'Orientador4', 'OrientadorProposto4', 'Preponente4', 2, 'Tecnologias4', NULL),
+(999, 'TFC5', 'Ano5', 'Avaliacao5', 'Coorientador5', '2023-05-01', '2023-05-15', 'Descrição5', 5, 'Estado5', 5, 'IDTFC4', 'Motivo5', 12, 'Orientador5', 'OrientadorProposto5', 'Preponente5', 2, 'Tecnologias5', NULL);
+
+SELECT idtfc AS NumRepetidos FROM TFC GROUP BY idtfc HAVING COUNT(idtfc) > 1;
 
 BEGIN TRANSACTION RemoveDuplicates;
 
@@ -694,7 +1011,7 @@ BEGIN TRANSACTION RemoveDuplicates;
 SELECT * FROM TFC WHERE idtfc like 'IDTFC%'
 COMMIT TRANSACTION RemoveDuplicates;
 delete from tfc where idtfc like 'IDTFC%'
-
+SELECT * FROM TFC WHERE idtfc like 'IDTFC%' --Garantir que os dados de teste foram apagados
 
 -- Aluno
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Aluno' AND COLUMN_NAME = 'id_temp')
@@ -703,8 +1020,9 @@ BEGIN
     ADD id_temp INT;
 END;
 
-SELECT numeroAluno, COUNT(numeroAluno) AS NumRepetidos FROM Aluno GROUP BY numeroAluno HAVING COUNT(numeroAluno) > 1;
+GO
 
+SELECT numeroAluno, COUNT(numeroAluno) AS NumRepetidos FROM Aluno GROUP BY numeroAluno HAVING COUNT(numeroAluno) > 1;
 
 BEGIN TRANSACTION RemoveDuplicates;
 
@@ -717,15 +1035,19 @@ BEGIN TRANSACTION RemoveDuplicates;
 	FROM Aluno t1
 	JOIN Aluno t2 ON t1.numeroAluno = t2.numeroAluno AND t1.id_temp < t2.id_temp;
 
+	SELECT numeroAluno AS NumRepetidos FROM Aluno GROUP BY numeroAluno HAVING COUNT(numeroAluno) > 1;
+
 COMMIT TRANSACTION RemoveDuplicates;
 
-             
+
 -- ProfessorDEISI
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ProfessorDEISI' AND COLUMN_NAME = 'id_temp')
 BEGIN
     ALTER TABLE ProfessorDEISI
     ADD id_temp INT;
 END;
+
+GO
 
 BEGIN TRANSACTION RemoveDuplicatesProfessorDEISI;
 DECLARE @counterProfessorDEISI INT = 1;
@@ -736,9 +1058,10 @@ DECLARE @counterProfessorDEISI INT = 1;
 	DELETE t1
 	FROM ProfessorDEISI t1
 	JOIN ProfessorDEISI t2 ON t1.numeroProfessor = t2.numeroProfessor AND t1.id_temp < t2.id_temp;
+	
+	SELECT numeroProfessor AS NumRepetidos FROM ProfessorDEISI GROUP BY numeroProfessor HAVING COUNT(numeroProfessor) > 1;
 
 COMMIT TRANSACTION RemoveDuplicatesProfessorDEISI;
-
 
 
 -- ProfessorNDEISI
@@ -748,6 +1071,7 @@ BEGIN
     ADD id_temp INT;
 END;
 
+GO
 BEGIN TRANSACTION RemoveDuplicatesProfessorNDEISI;
 
 DECLARE @counterProfessorNDEISI INT = 1;
@@ -758,23 +1082,30 @@ DECLARE @counterProfessorNDEISI INT = 1;
 	FROM ProfessorNDEISI t1
 	JOIN ProfessorNDEISI t2 ON t1.idProfessor = t2.idProfessor AND t1.id_temp < t2.id_temp;
 
+	SELECT idProfessor AS NumRepetidos FROM ProfessorNDEISI GROUP BY idProfessor HAVING COUNT(idProfessor) > 1;
+
 COMMIT TRANSACTION RemoveDuplicatesProfessorNDEISI;
 
 
 -- Grupo
+--alunos que estao repetidos no grupo e numero de vezes repetidas
+SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
+
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Grupo' AND COLUMN_NAME = 'id_temp')
 BEGIN
     ALTER TABLE Grupo
     ADD id_temp INT;
 END;
-select * from Grupo
-SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
--- Create a temporary table
-CREATE TABLE TempDuplicadosGrupo (
-    idNumeroAluno VARCHAR(255),
-    Count INT
-);
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TempDuplicadosGrupo')
+BEGIN
+    -- Create a temporary table
+	CREATE TABLE TempDuplicadosGrupo (
+		idNumeroAluno VARCHAR(255),
+		Count INT
+	);
+END;
+GO
 
 -- Insert values into the temporary table
 INSERT INTO TempDuplicadosGrupo (idNumeroAluno, Count)
@@ -788,52 +1119,50 @@ GROUP BY idNumeroAluno
 HAVING COUNT(*) > 1;
 
 SELECT * FROM TempDuplicadosGrupo;
+
 BEGIN TRANSACTION RemoveDuplicatesGrupo;
 
-UPDATE Grupo
-SET id_temp = TempDuplicadosGrupo.Count
-FROM (
-    SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo
-    UNION ALL 
-    SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo
-) AS Alunos
-JOIN TempDuplicadosGrupo ON Alunos.idNumeroAluno = TempDuplicadosGrupo.idNumeroAluno;
+	UPDATE Grupo
+	SET id_temp = TempDuplicadosGrupo.Count
+	FROM (
+		SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo
+		UNION ALL 
+		SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo
+	) AS Alunos
+	JOIN TempDuplicadosGrupo ON Alunos.idNumeroAluno = TempDuplicadosGrupo.idNumeroAluno;
 
-DELETE FROM Grupo
-WHERE EXISTS (
-    SELECT 1
-    FROM (
-        SELECT idNumeroAluno1 AS idNumeroAluno, MAX(id_temp) AS id_temp
-        FROM Grupo
-        GROUP BY idNumeroAluno1
-        HAVING COUNT(*) > 1
-        UNION ALL
-        SELECT idNumeroAluno2 AS idNumeroAluno, MAX(id_temp) AS id_temp
-        FROM Grupo
-        GROUP BY idNumeroAluno2
-        HAVING COUNT(*) > 1
-    ) AS Duplicates
-    WHERE (Grupo.idNumeroAluno1 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
-       OR (Grupo.idNumeroAluno2 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
-);
+	DELETE FROM Grupo
+	WHERE EXISTS (
+		SELECT 1
+		FROM (
+			SELECT idNumeroAluno1 AS idNumeroAluno, MAX(id_temp) AS id_temp
+			FROM Grupo
+			GROUP BY idNumeroAluno1
+			HAVING COUNT(*) > 1
+			UNION ALL
+			SELECT idNumeroAluno2 AS idNumeroAluno, MAX(id_temp) AS id_temp
+			FROM Grupo
+			GROUP BY idNumeroAluno2
+			HAVING COUNT(*) > 1
+		) AS Duplicates
+		WHERE (Grupo.idNumeroAluno1 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
+		   OR (Grupo.idNumeroAluno2 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
+	);
 
---validar que foram eliminados duplicados, nao eliminou todos
-SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
+	--validar que foram eliminados duplicados, nao eliminou todos
+	SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
 
 COMMIT TRANSACTION RemoveDuplicatesGrupo
---ROLLBACK TRANSACTION RemoveDuplicatesGrupo
 
 --drop tabela temporaria
-DROP TABLE TempDuplicadosGrupo;
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TempDuplicadosGrupo')
+BEGIN
+    DROP TABLE TempDuplicadosGrupo;
+END;
 
--- 5.3 
--- Tabelas afetadas pelo idTFC
 
--- Valida TFCCurso
-SELECT count(*) FROM TFCCurso WHERE idTFC NOT IN (SELECT id FROM TFC);
--- Valida TFCTecnologia
-SELECT count(*) FROM TFCTecnologia WHERE idTFC NOT IN (SELECT id FROM TFC);
+--5.3.1
 -- Valida Inscricao
 SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 -- Valida HistoricoTFC
@@ -841,18 +1170,9 @@ SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
 BEGIN TRANSACTION VerificarCoerenciaIdTFC;
 
-	DELETE FROM TFCCurso WHERE idTFC NOT IN (SELECT id FROM TFC);
-
-	DELETE FROM TFCTecnologia WHERE idTFC NOT IN (SELECT id FROM TFC);
-
 	DELETE FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
-
 	DELETE FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
--- Valida TFCCurso
-SELECT count(*) FROM TFCCurso WHERE idTFC NOT IN (SELECT id FROM TFC);
--- Valida TFCTecnologia
-SELECT count(*) FROM TFCTecnologia WHERE idTFC NOT IN (SELECT id FROM TFC);
 -- Valida Inscricao
 SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 -- Valida HistoricoTFC
@@ -860,49 +1180,109 @@ SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
 COMMIT TRANSACTION VerificarCoerencia;
 
--- numeroProfessor
+GO
 
-SELECT count(*) FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI);
-SELECT count(*) FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI);
+
+--5.3.2
+SELECT
+    (SELECT COUNT(*) FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)) AS NotInCount,
+    (SELECT COUNT(*) FROM TFC WHERE orientador IS NULL) AS NullCount;
+
+SELECT
+    (SELECT COUNT(*) FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)) AS NotInCount,
+    (SELECT COUNT(*) FROM TFC WHERE orientadorProposto IS NULL) AS NullCount;
 
 BEGIN TRANSACTION VerificarNumeroProfessor;
-            DELETE FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)
-            DELETE FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)
+    DELETE FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI) or orientador IS NULL;
+    DELETE FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI) or orientadorProposto IS NULL;
 
-SELECT count(*) FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI);
-SELECT count(*) FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI);
+	SELECT
+		(SELECT COUNT(*) FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)) AS NotInCount,
+		(SELECT COUNT(*) FROM TFC WHERE orientador IS NULL) AS NullCount;
 
- COMMIT TRANSACTION VerificarCoerencia;
+	SELECT
+		(SELECT COUNT(*) FROM TFC WHERE orientadorProposto NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)) AS NotInCount,
+		(SELECT COUNT(*) FROM TFC WHERE orientadorProposto IS NULL) AS NullCount;
 
+ COMMIT TRANSACTION VerificarNumeroProfessor;
 
--- idNumeroAluno1 e idNumeroAluno2 numeroAluno
+ GO 
 
- SELECT count(*) FROM AvaliacaoDisciplinaAluno WHERE idNumeroAluno NOT IN (SELECT numeroAluno FROM Aluno);
- SELECT count(*) FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno);
- SELECT count(*) FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno);
+ SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --579 inscricoes que nao existem em TFC
+ SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --439 HistoricoTFC que nao existem em TFC
 
-BEGIN TRANSACTION VerificarNumAluno;
-	 DELETE FROM AvaliacaoDisciplinaAluno WHERE idNumeroAluno NOT IN (SELECT numeroAluno FROM Aluno)
-	 DELETE FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno)
-	 DELETE FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno)
+ BEGIN TRANSACTION LimparDependentesTFC;
+    DELETE FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
+    DELETE FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
- SELECT count(*) FROM AvaliacaoDisciplinaAluno WHERE idNumeroAluno NOT IN (SELECT numeroAluno FROM Aluno);
- SELECT count(*) FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno);
- SELECT count(*) FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno);
+	 SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 inscricoes que nao existem em TFC
+	 SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 HistoricoTFC que nao existem em TFC
 
- COMMIT TRANSACTION VerificarNumAluno;
-
-
--- idGrupo
- SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)
-
-BEGIN TRANSACTION VerificaridGrupo;
-
-            DELETE FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)
-
- SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)
-
- COMMIT TRANSACTION VerificaridGrupo;
+COMMIT TRANSACTION LimparDependentesTFC;
 
 
-                
+GO
+
+--5.3.3 Todas as referências a alunos têm que existir em [Aluno].[numeroAluno]
+--		mesmo com identificação de grupo e [Grupo].[id] 
+/*SELECT
+    (SELECT COUNT(*) FROM AvaliacaoDisciplinaAluno WHERE idNumeroAluno NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+    (SELECT COUNT(*) FROM AvaliacaoDisciplinaAluno WHERE idNumeroAluno IS NULL) AS NullCount;
+*/
+--Validar onde e que os numeros de aluno estao mal
+SELECT
+    (SELECT COUNT(*) FROM Inscricao WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+    (SELECT COUNT(*) FROM Inscricao WHERE numeroAluno IS NULL) AS NullCount;
+
+SELECT
+    (SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+    (SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno1 IS NULL) AS NullCount;
+
+SELECT
+    (SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+    (SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 IS NULL) AS NullCount;
+
+
+--Apagar referencias a alunos que estao mal
+BEGIN TRANSACTION VerificarNumeroAluno;
+    DELETE FROM Inscricao WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno) or numeroAluno IS NULL;
+    DELETE FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno) or idNumeroAluno1 IS NULL;
+    DELETE FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno) or idNumeroAluno2 IS NULL;
+
+	SELECT
+		(SELECT COUNT(*) FROM Inscricao WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+		(SELECT COUNT(*) FROM Inscricao WHERE numeroAluno IS NULL) AS NullCount;
+
+	SELECT
+		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno1 IS NULL) AS NullCount;
+
+	SELECT
+		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
+		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 IS NULL) AS NullCount;
+
+ COMMIT TRANSACTION VerificarNumeroAluno;
+
+
+SELECT
+	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+
+SELECT
+	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+
+	--Apagar tfcs e inscricoes que nao tenham grupos validos
+BEGIN TRANSACTION VerificarNumeroAluno;
+    DELETE FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo) or idGrupo IS NULL;
+    DELETE FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo) or idNumeroGrupo IS NULL;
+
+	SELECT
+		(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+		(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+
+	SELECT
+		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+
+ COMMIT TRANSACTION VerificarNumeroAluno;

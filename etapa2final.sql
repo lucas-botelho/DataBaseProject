@@ -110,6 +110,9 @@ ALTER TABLE Utilizador ADD CONSTRAINT UK_Utilizador_idIdentificacao UNIQUE (idId
  ALTER TABLE AvaliacaoDisciplinaAluno ADD tempNumALuno bigint;
 
  UPDATE AvaliacaoDisciplinaAluno SET tempNumALuno = idNumeroAluno;
+
+ DROP INDEX index_AvaliacaoDisciplinaAluno_idNumeroAluno ON AvaliacaoDisciplinaAluno;
+
  ALTER TABLE AvaliacaoDisciplinaAluno DROP COLUMN idNumeroAluno;
 
  ALTER TABLE AvaliacaoDisciplinaAluno ADD idNumeroAluno varchar(255);
@@ -170,7 +173,7 @@ ALTER TABLE Utilizador ADD CONSTRAINT UK_Utilizador_idIdentificacao UNIQUE (idId
 ALTER TABLE TFC DROP CONSTRAINT PK_TFC_id;
 DROP INDEX indexTFC_id ON TFC;
 DROP INDEX indexTFC_idtfc ON TFC;
-ALTER TABLE TFC DROP CONSTRAINT UK_TFC_idTFC;
+--ALTER TABLE TFC DROP CONSTRAINT UK_TFC_idTFC;
 
 -- Alterar a coluna para não permitir nulos
 ALTER TABLE TFC ALTER COLUMN idTFC varchar(255) NOT NULL;
