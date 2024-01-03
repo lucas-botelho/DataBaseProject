@@ -1291,9 +1291,9 @@ SELECT COUNT(idtfc) AS NumRepetidos FROM TFC GROUP BY idtfc HAVING COUNT(idtfc) 
 SELECT COUNT(numeroAluno) AS NumRepetidos FROM Aluno GROUP BY numeroAluno HAVING COUNT(numeroAluno) > 1;
 --AvaliacaoDisciplinaAluno ainda nao tem dados
 --Curso
-SELECT COUNT(nome)  AS NumRepetidos FROM Curso GROUP BY nome HAVING COUNT(nome) > 1;
+SELECT COUNT(nome) AS NumRepetidos FROM Curso GROUP BY nome HAVING COUNT(nome) > 1;
 --Disciplina
-SELECT COUNT(nome)  AS NumRepetidos FROM Disciplina GROUP BY nome HAVING COUNT(nome) > 1;
+SELECT COUNT(nome) AS NumRepetidos FROM Disciplina GROUP BY nome HAVING COUNT(nome) > 1;
 --Empresa_EntidadeExterna
 SELECT COUNT(id) AS NumRepetidos FROM Empresa_EntidadeExterna GROUP BY id HAVING COUNT(id) > 1;
 --Grupo
@@ -1341,13 +1341,6 @@ END;
 
 GO
 
-INSERT INTO TFC VALUES
-(999, 'TFC1', 'Ano1', 'Avaliacao1', 'Coorientador1', '2023-01-01', '2023-01-15', 'Descrição1', 1, 'Estado1', 1, 'IDTFC3', 'Motivo1', 5, 'Orientador1', 'OrientadorProposto1', 'Preponente1', 1, 'Tecnologias1', NULL),
-(999, 'TFC2', 'Ano2', 'Avaliacao2', 'Coorientador2', '2023-02-01', '2023-02-15', 'Descrição2', 2, 'Estado2', 2, 'IDTFC3', 'Motivo2', 7, 'Orientador2', 'OrientadorProposto2', 'Preponente2', 2, 'Tecnologias2', NULL),
-(999, 'TFC3', 'Ano3', 'Avaliacao3', 'Coorientador3', '2023-03-01', '2023-03-15', 'Descrição3', 3, 'Estado3', 3, 'IDTFC3', 'Motivo3', 8, 'Orientador3', 'OrientadorProposto3', 'Preponente3', 1, 'Tecnologias3', NULL),
-(999, 'TFC4', 'Ano4', 'Avaliacao4', 'Coorientador4', '2023-04-01', '2023-04-15', 'Descrição4', 4, 'Estado4', 4, 'IDTFC4', 'Motivo4', 10, 'Orientador4', 'OrientadorProposto4', 'Preponente4', 2, 'Tecnologias4', NULL),
-(999, 'TFC5', 'Ano5', 'Avaliacao5', 'Coorientador5', '2023-05-01', '2023-05-15', 'Descrição5', 5, 'Estado5', 5, 'IDTFC4', 'Motivo5', 12, 'Orientador5', 'OrientadorProposto5', 'Preponente5', 2, 'Tecnologias5', NULL);
-
 SELECT idtfc AS NumRepetidos FROM TFC GROUP BY idtfc HAVING COUNT(idtfc) > 1;
 
 BEGIN TRANSACTION RemoveDuplicates;
@@ -1364,10 +1357,8 @@ BEGIN TRANSACTION RemoveDuplicates;
 	JOIN dbo.TFC t2 ON t1.idtfc = t2.idtfc AND t1.id_temp < t2.id_temp;
 
 --validar que duplicados foram eliminados
-SELECT * FROM TFC WHERE idtfc like 'IDTFC%'
+SELECT idtfc AS NumRepetidos FROM TFC GROUP BY idtfc HAVING COUNT(idtfc) > 1;
 COMMIT TRANSACTION RemoveDuplicates;
-delete from tfc where idtfc like 'IDTFC%'
-SELECT * FROM TFC WHERE idtfc like 'IDTFC%' --Garantir que os dados de teste foram apagados
 
 -- Aluno
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Aluno' AND COLUMN_NAME = 'id_temp')
@@ -1443,80 +1434,43 @@ DECLARE @counterProfessorNDEISI INT = 1;
 COMMIT TRANSACTION RemoveDuplicatesProfessorNDEISI;
 
 
--- Grupo
+--5.3.3 Grupo
 --alunos que estao repetidos no grupo e numero de vezes repetidas
-SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
+SELECT idNumeroAluno, COUNT(*) AS NumRepetidos
+FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos
+GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
-IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Grupo' AND COLUMN_NAME = 'id_temp')
-BEGIN
-    ALTER TABLE Grupo
-    ADD id_temp INT;
-END;
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TempDuplicadosGrupo')
-BEGIN
-    -- Create a temporary table
-	CREATE TABLE TempDuplicadosGrupo (
-		idNumeroAluno VARCHAR(255),
-		Count INT
+BEGIN TRANSACTION RemoveDuplicadosGrupos;
+	DELETE FROM Grupo
+	WHERE idNumeroAluno1 IN (
+		SELECT idNumeroAluno1
+		FROM Grupo
+		GROUP BY idNumeroAluno1
+		HAVING COUNT(idNumeroAluno1) > 1
+	)
+	OR idNumeroAluno2 IN (
+		SELECT idNumeroAluno2
+		FROM Grupo
+		GROUP BY idNumeroAluno2
+		HAVING COUNT(idNumeroAluno2) > 1
 	);
-END;
-GO
-
--- Insert values into the temporary table
-INSERT INTO TempDuplicadosGrupo (idNumeroAluno, Count)
-SELECT idNumeroAluno, COUNT(*) AS Count
-FROM (
-    SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo
-    UNION ALL 
-    SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo
-) AS Alunos
-GROUP BY idNumeroAluno
-HAVING COUNT(*) > 1;
-
-SELECT * FROM TempDuplicadosGrupo;
-
-BEGIN TRANSACTION RemoveDuplicatesGrupo;
-
-	UPDATE Grupo
-	SET id_temp = TempDuplicadosGrupo.Count
-	FROM (
-		SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo
-		UNION ALL 
-		SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo
-	) AS Alunos
-	JOIN TempDuplicadosGrupo ON Alunos.idNumeroAluno = TempDuplicadosGrupo.idNumeroAluno;
 
 	DELETE FROM Grupo
-	WHERE EXISTS (
-		SELECT 1
-		FROM (
-			SELECT idNumeroAluno1 AS idNumeroAluno, MAX(id_temp) AS id_temp
-			FROM Grupo
-			GROUP BY idNumeroAluno1
-			HAVING COUNT(*) > 1
-			UNION ALL
-			SELECT idNumeroAluno2 AS idNumeroAluno, MAX(id_temp) AS id_temp
-			FROM Grupo
-			GROUP BY idNumeroAluno2
-			HAVING COUNT(*) > 1
-		) AS Duplicates
-		WHERE (Grupo.idNumeroAluno1 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
-		   OR (Grupo.idNumeroAluno2 = Duplicates.idNumeroAluno AND Grupo.id_temp = Duplicates.id_temp)
+	WHERE idNumeroAluno2 IN (
+		SELECT idNumeroAluno1
+		FROM Grupo
+	)
+	OR idNumeroAluno1 IN (
+		SELECT idNumeroAluno2
+		FROM Grupo
 	);
 
-	--validar que foram eliminados duplicados, nao eliminou todos
-	SELECT idNumeroAluno, COUNT(*) AS NumRepetidos FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
+	--validar que foram eliminados duplicados
+	SELECT idNumeroAluno, COUNT(*) AS NumRepetidos
+	FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos
+	GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
-
-COMMIT TRANSACTION RemoveDuplicatesGrupo
-
---drop tabela temporaria
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'TempDuplicadosGrupo')
-BEGIN
-    DROP TABLE TempDuplicadosGrupo;
-END;
-
+COMMIT rollback TRANSACTION RemoveDuplicadosGrupos
 
 --5.3.1
 -- Valida Inscricao
@@ -1525,14 +1479,13 @@ SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
 BEGIN TRANSACTION VerificarCoerenciaIdTFC;
-
 	DELETE FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 	DELETE FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
--- Valida Inscricao
-SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
--- Valida HistoricoTFC
-SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
+	-- Valida Inscricao
+	SELECT count(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
+	-- Valida HistoricoTFC
+	SELECT count(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
 COMMIT TRANSACTION VerificarCoerencia;
 
@@ -1552,8 +1505,34 @@ BEGIN TRANSACTION VerificarNumeroProfessor;
 		(SELECT COUNT(*) FROM TFC WHERE orientador IS NULL) AS NullCount;
 
  COMMIT TRANSACTION VerificarNumeroProfessor;
-
+ 
  GO 
+
+ 
+SELECT
+	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+
+SELECT
+	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+
+	--Apagar tfcs e inscricoes que nao tenham grupos validos
+BEGIN TRANSACTION VerificarNumeroAluno;
+    DELETE FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo) or idGrupo IS NULL;
+    DELETE FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo) or idNumeroGrupo IS NULL;
+
+	SELECT
+		(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+		(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+
+	SELECT
+		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+
+ COMMIT TRANSACTION VerificarNumeroAluno;
+
+ GO
 
  SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --579 inscricoes que nao existem em TFC
  SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --439 HistoricoTFC que nao existem em TFC
@@ -1607,29 +1586,5 @@ BEGIN TRANSACTION VerificarNumeroAluno;
 	SELECT
 		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
 		(SELECT COUNT(*) FROM Grupo WHERE idNumeroAluno2 IS NULL) AS NullCount;
-
- COMMIT TRANSACTION VerificarNumeroAluno;
-
-
-SELECT
-	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
-
-SELECT
-	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
-
-	--Apagar tfcs e inscricoes que nao tenham grupos validos
-BEGIN TRANSACTION VerificarNumeroAluno;
-    DELETE FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo) or idGrupo IS NULL;
-    DELETE FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo) or idNumeroGrupo IS NULL;
-
-	SELECT
-		(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-		(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
-
-	SELECT
-		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
 
  COMMIT TRANSACTION VerificarNumeroAluno;
