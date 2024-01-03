@@ -1436,41 +1436,139 @@ COMMIT TRANSACTION RemoveDuplicatesProfessorNDEISI;
 
 --5.3.3 Grupo
 --alunos que estao repetidos no grupo e numero de vezes repetidas
-SELECT idNumeroAluno, COUNT(*) AS NumRepetidos
-FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos
-GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
+--SELECT idNumeroAluno, COUNT(*) AS NumRepetidos
+--FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos
+--GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
-BEGIN TRANSACTION RemoveDuplicadosGrupos;
-	DELETE FROM Grupo
-	WHERE idNumeroAluno1 IN (
-		SELECT idNumeroAluno1
-		FROM Grupo
-		GROUP BY idNumeroAluno1
-		HAVING COUNT(idNumeroAluno1) > 1
-	)
-	OR idNumeroAluno2 IN (
-		SELECT idNumeroAluno2
-		FROM Grupo
-		GROUP BY idNumeroAluno2
-		HAVING COUNT(idNumeroAluno2) > 1
-	);
+--BEGIN TRANSACTION RemoveDuplicadosGrupos;
+--	update grupo set idNumeroAluno2 = null
+--		WHERE idNumeroAluno2 IN (
+--			SELECT idNumeroAluno1
+--			FROM Grupo
+--		)
+	
+--	DELETE FROM Grupo
+--	WHERE idNumeroAluno1 IN (
+--		SELECT idNumeroAluno2
+--		FROM Grupo
+--	);
 
-	DELETE FROM Grupo
-	WHERE idNumeroAluno2 IN (
-		SELECT idNumeroAluno1
-		FROM Grupo
-	)
-	OR idNumeroAluno1 IN (
-		SELECT idNumeroAluno2
-		FROM Grupo
-	);
+--	DELETE FROM Grupo
+--	WHERE idNumeroAluno1 IN (
+--		SELECT idNumeroAluno1
+--		FROM Grupo
+--		GROUP BY idNumeroAluno1
+--		HAVING COUNT(idNumeroAluno1) > 1
+--	)
+--	OR idNumeroAluno2 IN (
+--		SELECT idNumeroAluno2
+--		FROM Grupo
+--		GROUP BY idNumeroAluno2
+--		HAVING COUNT(idNumeroAluno2) > 1
+--	);
+
+-- Create temporary table 1 if it does not exist
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TempTable1')
+BEGIN
+    CREATE TABLE TempTable1 (
+        id BIGINT NULL,
+        confirmaAluno1 TINYINT NULL,
+        confirmaAluno2 TINYINT NULL,
+        idNumeroAluno1 VARCHAR(255) NULL,
+        idNumeroAluno2 VARCHAR(255) NULL
+    );
+END;
+
+-- Create temporary table 2 if it does not exist
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'TempTable2')
+BEGIN
+    CREATE TABLE TempTable2 (
+        id BIGINT NULL,
+        confirmaAluno1 TINYINT NULL,
+        confirmaAluno2 TINYINT NULL,
+        idNumeroAluno1 VARCHAR(255) NULL,
+        idNumeroAluno2 VARCHAR(255) NULL
+    );
+END;
+
+go
+-- Insert data into TempTable1
+INSERT INTO TempTable1 (id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2)
+SELECT id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2
+FROM Grupo;
+
+-- Insert data into TempTable2
+INSERT INTO TempTable2 (id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2)
+SELECT id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2
+FROM Grupo;
+
+
+-- Delete all data from Grupo
+DELETE FROM Grupo;
+
+-- Update TempTable2: set idNumeroAluno2 to NULL where it matches idNumeroAluno1 in Grupo
+-- Update TempTable2: set idNumeroAluno2 to NULL when it is equal to idNumeroAluno1
+UPDATE TempTable2
+SET idNumeroAluno2 = NULL
+WHERE idNumeroAluno2 = idNumeroAluno1;
+
+-- Delete rows from TempTable2 where idNumeroAluno1 matches idNumeroAluno2 in Grupo
+DELETE FROM TempTable2
+WHERE idNumeroAluno1 IN (
+    SELECT idNumeroAluno2
+    FROM Grupo
+);
+
+-- Delete duplicate rows from TempTable2 based on idNumeroAluno1 and idNumeroAluno2
+DELETE FROM TempTable2
+WHERE idNumeroAluno1 IN (
+    SELECT idNumeroAluno1
+    FROM TempTable2
+    GROUP BY idNumeroAluno1
+    HAVING COUNT(idNumeroAluno1) > 1
+)
+OR idNumeroAluno2 IN (
+    SELECT idNumeroAluno2
+    FROM TempTable2
+    GROUP BY idNumeroAluno2
+    HAVING COUNT(idNumeroAluno2) > 1
+);
+
+DELETE FROM TempTable2
+WHERE idNumeroAluno2 IN (
+    SELECT idNumeroAluno1
+    FROM TempTable2
+);
+
+-- Insert data from TempTable2 into Grupo
+INSERT INTO Grupo (id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2)
+SELECT id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2
+FROM TempTable2;
+
+-- Insert data from TempTable1 into Grupo for rows that don't exist
+INSERT INTO Grupo (id, confirmaAluno1, confirmaAluno2, idNumeroAluno1, idNumeroAluno2)
+SELECT t1.id, t1.confirmaAluno1, t1.confirmaAluno2, t1.idNumeroAluno1, t1.idNumeroAluno2
+FROM TempTable1 t1
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Grupo g
+    WHERE g.id = t1.id
+    AND g.confirmaAluno1 = t1.confirmaAluno1
+    AND g.confirmaAluno2 = t1.confirmaAluno2
+    AND g.idNumeroAluno1 = t1.idNumeroAluno1
+    AND g.idNumeroAluno2 = t1.idNumeroAluno2
+);
+
+
+
+
 
 	--validar que foram eliminados duplicados
 	SELECT idNumeroAluno, COUNT(*) AS NumRepetidos
 	FROM ( SELECT idNumeroAluno1 AS idNumeroAluno FROM Grupo UNION ALL SELECT idNumeroAluno2 AS idNumeroAluno FROM Grupo ) AS Alunos
 	GROUP BY idNumeroAluno HAVING COUNT(*) > 1;
 
-COMMIT rollback TRANSACTION RemoveDuplicadosGrupos
+--COMMIT TRANSACTION RemoveDuplicadosGrupos
 
 --5.3.1
 -- Valida Inscricao
