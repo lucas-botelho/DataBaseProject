@@ -404,6 +404,8 @@ BEGIN TRY
 
         ---- [tecnologia]
 		ALTER TABLE Tecnologia ALTER COLUMN id BIGINT NOT NULL;
+
+		SELECT * FROM Tecnologia WHERE NOME IS NULL
 		ALTER TABLE Tecnologia ALTER COLUMN nome VARCHAR(255) NOT NULL;
 
         ---- [disciplina]
@@ -1545,7 +1547,9 @@ SELECT
     (SELECT COUNT(*) FROM TFC WHERE orientador IS NULL) AS NullCount;
 
 BEGIN TRANSACTION VerificarNumeroProfessor;
-    DELETE FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI) or orientador IS NULL;
+	UPDATE TFC
+	SET orientador = NULL
+	WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI);
 
 	SELECT
 		(SELECT COUNT(*) FROM TFC WHERE orientador NOT IN (SELECT numeroProfessor FROM ProfessorDEISI)) AS NotInCount,
@@ -1555,20 +1559,20 @@ BEGIN TRANSACTION VerificarNumeroProfessor;
 
  GO 
 
- SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --579 inscricoes que nao existem em TFC
- SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --439 HistoricoTFC que nao existem em TFC
+-- SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --579 inscricoes que nao existem em TFC
+-- SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --439 HistoricoTFC que nao existem em TFC
 
- BEGIN TRANSACTION LimparDependentesTFC;
-    DELETE FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
-    DELETE FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
+-- BEGIN TRANSACTION LimparDependentesTFC;
+--    DELETE FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
+--    DELETE FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC);
 
-	 SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 inscricoes que nao existem em TFC
-	 SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 HistoricoTFC que nao existem em TFC
+--	 SELECT COUNT(*) FROM Inscricao WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 inscricoes que nao existem em TFC
+--	 SELECT COUNT(*) FROM HistoricoTFC WHERE idTFC NOT IN (SELECT idTFC FROM TFC); --0 HistoricoTFC que nao existem em TFC
 
-COMMIT TRANSACTION LimparDependentesTFC;
+--COMMIT TRANSACTION LimparDependentesTFC;
 
 
-GO
+--GO
 
 --5.3.3 Todas as referências a alunos têm que existir em [Aluno].[numeroAluno]
 --		mesmo com identificação de grupo e [Grupo].[id] 
@@ -1592,9 +1596,18 @@ SELECT
 
 --Apagar referencias a alunos que estao mal
 BEGIN TRANSACTION VerificarNumeroAluno;
-    DELETE FROM Inscricao WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno) or numeroAluno IS NULL;
-    DELETE FROM Grupo WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno) or idNumeroAluno1 IS NULL;
-    DELETE FROM Grupo WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno) or idNumeroAluno2 IS NULL;
+		UPDATE Inscricao
+		SET numeroAluno = NULL
+		WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno);
+
+		UPDATE Grupo
+		SET idNumeroAluno1 = NULL
+		WHERE idNumeroAluno1 NOT IN (SELECT numeroAluno FROM Aluno);
+
+		UPDATE Grupo
+		SET idNumeroAluno2 = NULL
+		WHERE idNumeroAluno2 NOT IN (SELECT numeroAluno FROM Aluno);
+
 
 	SELECT
 		(SELECT COUNT(*) FROM Inscricao WHERE numeroAluno NOT IN (SELECT numeroAluno FROM Aluno)) AS NotInCount,
@@ -1611,25 +1624,30 @@ BEGIN TRANSACTION VerificarNumeroAluno;
  COMMIT TRANSACTION VerificarNumeroAluno;
 
 
-SELECT
-	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+--SELECT
+--	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+--	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
 
-SELECT
-	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+--SELECT
+--	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+--	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
 
-	--Apagar tfcs e inscricoes que nao tenham grupos validos
-BEGIN TRANSACTION VerificarNumeroAluno;
-    DELETE FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo) or idGrupo IS NULL;
-    DELETE FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo) or idNumeroGrupo IS NULL;
+	----Apagar tfcs e inscricoes que nao tenham grupos validos
+--BEGIN TRANSACTION VerificarNumeroAluno;
+	--   UPDATE TFC
+	--SET idGrupo = NULL
+	--WHERE idGrupo NOT IN (SELECT id FROM Grupo) OR idGrupo IS NULL;
 
-	SELECT
-		(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-		(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
+	--UPDATE Inscricao
+	--SET idNumeroGrupo = NULL
+	--WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo) OR idNumeroGrupo IS NULL;
 
-	SELECT
-		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
-		(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+	--SELECT
+	--	(SELECT count(*) FROM TFC WHERE idGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	--	(SELECT count(*) FROM TFC WHERE idGrupo is null) AS NullCount;
 
- COMMIT TRANSACTION VerificarNumeroAluno;
+	--SELECT
+	--	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo NOT IN (SELECT id FROM Grupo)) AS NotInCount,
+	--	(SELECT count(*) FROM Inscricao WHERE idNumeroGrupo is null) AS NullCount;
+
+ --COMMIT TRANSACTION VerificarNumeroAluno;
