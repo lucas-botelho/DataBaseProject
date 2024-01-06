@@ -7,7 +7,7 @@ USE tfc;
 --start Q1
 --Esta funcao devolve os os ids de grupo que deixaram de existir em Inscricao porque foram movidos e mapeados na tabela TFC
 go
-CREATE FUNCTION dbo.GetGroupIdForTFC ()
+CREATE OR ALTER FUNCTION dbo.GetGroupIdForTFC ()
 RETURNS INT
 AS
 BEGIN
@@ -46,12 +46,13 @@ AS
 RETURN
     SELECT 
         M.*,
-        CalculatedMedia.AverageNota
+        CalculatedMedia.Média
     FROM (
         SELECT DISTINCT 
             @tema AS 'TFC', 
             IDAluno,
 			NRAluno,
+			ECTS,
             FIRST_VALUE(OrdemEscolha) OVER(PARTITION BY IDAluno ORDER BY (SELECT NULL)) AS 'Ordem escolha',
             FIRST_VALUE(RegistoInscricao) OVER(PARTITION BY IDAluno ORDER BY (SELECT NULL)) AS 'Registo inscricao',
             FIRST_VALUE(Orientador) OVER(PARTITION BY IDAluno ORDER BY (SELECT NULL)) AS 'Orientador'
@@ -60,6 +61,7 @@ RETURN
                 @tema AS LiteralColumnName, 
 				aluno.id AS 'IDAluno',
                 grupo.idNumeroAluno1 AS 'NRAluno', 
+				aluno.ECTS AS 'ECTS',
                 inscricao.ordemEscolha AS 'OrdemEscolha',
                 inscricao.registoDeInscricao AS 'RegistoInscricao',
                 professorDEISI.nome AS 'Orientador'
@@ -76,6 +78,7 @@ RETURN
                 @tema AS LiteralColumnName, 
                 aluno.id AS 'IDAluno',
                 grupo.idNumeroAluno1 AS 'NRAluno', 
+				aluno.ECTS AS 'ECTS',
                 inscricao.ordemEscolha AS 'OrdemEscolha',
                 inscricao.registoDeInscricao AS 'RegistoInscricao',
                 professorDEISI.nome AS 'Orientador'
@@ -88,7 +91,7 @@ RETURN
         ) AS MergeQuery
     ) AS M
     CROSS APPLY (
-        SELECT dbo.Q2FunctionCalculaMedia(M.IDAluno) AS AverageNota
+        SELECT dbo.Q2FunctionCalculaMedia(M.IDAluno) AS 'Média'
     ) AS CalculatedMedia;
 GO
 
@@ -141,12 +144,28 @@ SELECT ProfessorDEISI.nome AS docente,
        TFC.Titulo AS TFC,
        TFC.titulo AS título,
        Aluno.nome AS aluno
-FROM TFC
+FROM TFC 
 JOIN ProfessorDEISI ON TFC.preponente = ProfessorDEISI.numeroProfessor AND TFC.estado = 4
 JOIN Grupo ON TFC.idGrupo = Grupo.id
-JOIN Aluno ON Aluno.numeroAluno = Grupo.idNumeroAluno1 OR Aluno.numeroAluno = Grupo.idNumeroAluno2;
-
+JOIN Aluno ON Aluno.numeroAluno = Grupo.idNumeroAluno1 OR Aluno.numeroAluno = Grupo.idNumeroAluno2
+WHERE TFC.preponente = 'p4997';
 --end Q4
+
+--start Q5
+SELECT Aluno.nome AS Aluno,
+       TFC.id AS TFC,
+       Inscricao.ordemEscolha AS ordemEscolha,
+       TFC.estado AS estadoTFC,
+       CASE 
+           WHEN TFC.estado = 3 THEN 'Disponível'
+           ELSE COALESCE(CONCAT(Grupo.id, ' - ', Aluno.nome), 'Disponível')
+       END AS atribuicao
+FROM Inscricao
+JOIN TFC ON Inscricao.idTFC = TFC.idtfc
+JOIN Grupo ON TFC.idGrupo = Grupo.id
+JOIN Aluno ON Grupo.idNumeroAluno1 = Aluno.numeroAluno OR Grupo.idNumeroAluno2 = Aluno.numeroAluno
+WHERE TFC.estado = 3 
+--end Q5
 
 --start q6
 select distinct * from EstadoTFC
@@ -243,3 +262,30 @@ WHERE
     TFC.idtfc = 'Aluno67';
 --end Q14
 
+--start Q16
+GO 
+CREATE TRIGGER prevenir_delete ON TFC
+INSTEAD OF DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM deleted WHERE estado = 4)
+    BEGIN
+        -- Não faz nada, simplesmente retorna sem executar a exclusão
+        RETURN;
+    END
+    ELSE
+    BEGIN
+        DELETE FROM TFC
+        FROM TFC
+        INNER JOIN deleted ON TFC.id = deleted.id;
+    END
+END;
+GO
+
+DELETE FROM TFC WHERE idtfc = 'Aluno57';
+select * from tfc where idtfc = 'Aluno57';
+
+
+--end Q16
