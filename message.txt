@@ -1,0 +1,252 @@
+-- 11. Criar FKs
+
+-- TFCTecnologia -> Tecnologia & TFCTecnologia -> TFC
+
+BEGIN TRANSACTION UpdateKeys	
+DELETE FROM TFCTecnologia
+WHERE idTecnologia IN (
+	SELECT TFCTecnologia.idTecnologia
+	FROM TFCTecnologia
+	LEFT JOIN Tecnologia ON TFCTecnologia.idTecnologia = Tecnologia.id
+	WHERE Tecnologia.id IS NULL
+);
+COMMIT TRANSACTION UpdateKeys
+
+alter table TFCTecnologia add temIdTfc bigint;
+GO
+UPDATE TFCTecnologia SET temIdTfc = idTFC;
+
+DROP INDEX index_tfc_tecnologia_idTFC ON TFCTecnologia;
+alter table TFCTecnologia drop column idTFC;
+GO
+alter table TFCTecnologia add idTFC varchar(255);
+GO
+
+BEGIN TRANSACTION UpdateKeysTFCTec
+UPDATE TFCTecnologia
+SET idTFC = TFC.idTFC
+FROM TFC
+WHERE TFCTecnologia.temIdTfc = TFC.id;
+COMMIT TRANSACTION UpdateKeysTFCTec
+alter table TFCTecnologia drop column temIdTfc;
+GO
+
+ALTER TABLE TFCTecnologia
+ADD CONSTRAINT FK_TFCTecnologia_Tecnologia FOREIGN KEY (idTecnologia)
+REFERENCES Tecnologia(id);
+
+ALTER TABLE TFCTecnologia
+ADD CONSTRAINT FK_TFCTecnologia_TFC FOREIGN KEY (idTfc)
+REFERENCES TFC(idTfc);
+
+-- AvaliacaoDisciciplinaAluno -> Aluno
+
+ALTER TABLE AvaliacaoDisciplinaAluno ADD tempNumALuno bigint;
+GO
+UPDATE AvaliacaoDisciplinaAluno SET tempNumALuno = idNumeroAluno;
+
+DROP INDEX index_avaliacao_disciplina_aluno_idNumeroAluno ON AvaliacaoDisciplinaAluno;
+
+ALTER TABLE AvaliacaoDisciplinaAluno DROP COLUMN idNumeroAluno;
+GO
+ALTER TABLE AvaliacaoDisciplinaAluno ADD idNumeroAluno varchar(255);
+ GO
+
+BEGIN TRANSACTION AtualizarKeysAvalDisAl
+UPDATE AvaliacaoDisciplinaAluno
+SET idNumeroAluno = Aluno.numeroAluno
+FROM Aluno
+WHERE AvaliacaoDisciplinaAluno.id = Aluno.id;
+COMMIT TRANSACTION AtualizarKeysAvalDisAl
+
+-- Apagar dados que nao sao validos
+DELETE FROM AvaliacaoDisciplinaAluno where idNumeroAluno is null;
+
+ALTER TABLE AvaliacaoDisciplinaAluno DROP COLUMN tempNumALuno;
+GO
+
+ALTER TABLE AvaliacaoDisciplinaAluno
+ADD CONSTRAINT FK_Aluno FOREIGN KEY (idNumeroAluno)
+REFERENCES Aluno (numeroAluno);
+
+-- TFCDisciplina -> TFC
+
+ALTER TABLE TFCDisciplina ADD tempIdTFC bigint;
+GO
+UPDATE TFCDisciplina SET tempIdTFC = numeroTFC;
+
+DROP INDEX index_tfc_disciplina_numeroTFC ON TFCDisciplina;
+
+ALTER TABLE TFCDisciplina DROP COLUMN numeroTFC;
+GO
+ALTER TABLE TFCDisciplina ADD numeroTFC varchar(255);
+GO
+BEGIN TRANSACTION AtualizarKeysTFCDisciplina
+UPDATE TFCDisciplina
+SET numeroTFC = TFC.idtfc
+FROM TFC
+WHERE TFCDisciplina.numeroTFC = TFC.idtfc;
+COMMIT TRANSACTION AtualizarKeysTFCDisciplina
+
+-- Apagar dados que nao sao validos
+DELETE FROM TFCDisciplina where numeroTFC is null;
+ALTER TABLE TFCDisciplina DROP COLUMN tempIdTFC;
+GO
+ALTER TABLE TFCDisciplina
+ADD CONSTRAINT tfcdisciplina_tfc_fk
+FOREIGN KEY (numeroTFC)
+REFERENCES TFC(idtfc);
+
+-- TFC -> Grupo
+
+SELECT
+    TFC.id AS idTFC,
+    TFC.titulo,
+    TFC.idGrupo AS idGrupoOriginal,
+    (SELECT TOP 1 idNumeroGrupo FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL) AS NovoIdGrupo
+FROM
+    TFC
+WHERE
+    TFC.idGrupo IS NULL
+    AND EXISTS (SELECT 1 FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL);
+
+BEGIN TRANSACTION UpdateGrupos
+UPDATE TFC
+SET idGrupo = (SELECT TOP 1 idNumeroGrupo FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL)
+WHERE
+    TFC.idGrupo IS NULL
+    AND EXISTS (SELECT 1 FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL);
+SELECT
+TFC.id AS idTFC,
+TFC.titulo,
+TFC.idGrupo AS idGrupoOriginal,
+(SELECT TOP 1 idNumeroGrupo FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL) AS NovoIdGrupo
+FROM
+    TFC
+WHERE
+    TFC.idGrupo IS NULL
+    AND EXISTS (SELECT 1 FROM Inscricao WHERE Inscricao.idTFC = TFC.idtfc AND idNumeroGrupo IS NOT NULL);
+
+UPDATE TFC
+SET idGrupo = null
+WHERE idGrupo not in (select id from Grupo);
+
+COMMIT TRANSACTION UpdateGrupos
+
+ALTER TABLE TFC
+ADD CONSTRAINT tfc_grupo_fk
+FOREIGN KEY (idGrupo)
+REFERENCES Grupo(id);
+
+-- TFCCurso -> TFC
+ALTER TABLE TFCCurso
+ADD CONSTRAINT tfccurso_idtfc_fk
+FOREIGN KEY (idTFC)
+REFERENCES TFC(idtfc);
+
+-- TFCCurso -> Curso
+ALTER TABLE TFCCurso
+ADD CONSTRAINT curso_tfccurso_fk
+FOREIGN KEY (idCurso)
+REFERENCES Curso(id);
+
+-- HistoricoTFC -> TFC
+ALTER TABLE HistoricoTFC
+ADD CONSTRAINT tfc_tfchistorico_fk
+FOREIGN KEY (idTFC)
+REFERENCES TFC(idtfc);
+
+-- Disciplina -> Curso
+ALTER TABLE Disciplina
+ADD CONSTRAINT disciplina_curso_fk
+FOREIGN KEY (cursoAssociado)
+REFERENCES Curso(id);
+
+-- TFCDisciplina -> Disciplina
+ALTER TABLE TFCDisciplina
+ADD CONSTRAINT tfcdisc_disc_fk
+FOREIGN KEY (idNumeroDisciplina)
+REFERENCES Disciplina(id);
+
+-- AvaliacaoDisciciplinaAluno -> Disciplina
+ALTER TABLE AvaliacaoDisciplinaAluno
+ADD CONSTRAINT tfcaval_disc_fk
+FOREIGN KEY (idNumeroDisciplina)
+REFERENCES Disciplina(id);
+
+-- Inscricao -> Aluno 
+ALTER TABLE Inscricao
+ADD CONSTRAINT inscr_aluno_fk
+FOREIGN KEY (numeroAluno)
+REFERENCES Aluno(numeroAluno);
+
+-- Grupo -> Aluno 1
+ALTER TABLE Grupo
+ADD CONSTRAINT grupo_aluno1_fk
+FOREIGN KEY (idNumeroAluno1)
+REFERENCES Aluno(numeroAluno);
+
+-- Grupo -> Aluno 2
+ALTER TABLE Grupo
+ADD CONSTRAINT grupo_aluno2_fk
+FOREIGN KEY (idNumeroAluno2)
+REFERENCES Aluno(numeroAluno);
+
+-- Inscricao -> TFC
+ALTER TABLE Inscricao
+ADD CONSTRAINT inscricao_tfc_fk
+FOREIGN KEY (idTFC)
+REFERENCES TFC(idtfc);
+
+-- HistoricoTFC -> Utilizador
+BEGIN TRANSACTION UpdateUtilizadores
+
+UPDATE HistoricoTFC
+SET utilizador = (
+    SELECT TOP 1 numeroProfessor
+    FROM ProfessorDEISI
+)
+WHERE utilizador NOT IN (
+    SELECT idIdentificacao
+    FROM Utilizador
+) AND
+utilizador in (select nome from ProfessorDEISI
+where nome in (select distinct(utilizador) from HistoricoTFC
+where utilizador not in (select idIdentificacao from Utilizador)));
+
+delete from HistoricoTFC where utilizador = (select TOP  1 utilizador from HistoricoTFC
+where utilizador not in (select idIdentificacao from Utilizador))
+
+select distinct(utilizador) from HistoricoTFC
+where utilizador not in (select idIdentificacao from Utilizador) 
+
+COMMIT TRANSACTION UpdateUtilizadores
+
+ALTER TABLE HistoricoTFC
+ADD CONSTRAINT histtfc_util_fk
+FOREIGN KEY (utilizador)
+REFERENCES Utilizador(idIdentificacao);
+
+-- TFC -> ProfessorDEISI Orientador
+ALTER TABLE TFC
+ADD CONSTRAINT tfc_profdeisi_fk
+FOREIGN KEY (orientador)
+REFERENCES ProfessorDEISI(numeroProfessor);
+
+-- TFC -> ProfessorDEISI Coorientador
+ALTER TABLE TFC
+ADD CONSTRAINT tfc_profdeisici_fk
+FOREIGN KEY (coorientador)
+REFERENCES ProfessorDEISI(numeroProfessor);
+
+-- TFC -> Empresa 
+
+-- Atualizar entidades que nao dao match para null
+BEGIN TRANSACTION UpdateEntidadeValues
+UPDATE TFC SET entidade = null WHERE entidade IS NOT NULL AND entidade NOT IN (SELECT id FROM Empresa_EntidadeExterna);
+COMMIT TRANSACTION UpdateEntidadeValues;
+
+ALTER TABLE TFC
+ADD CONSTRAINT tfc_empresa_fk
+FOREIGN KEY (entidade)
+REFERENCES Empresa_EntidadeExterna(id);

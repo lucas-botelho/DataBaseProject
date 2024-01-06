@@ -1249,9 +1249,9 @@ UPDATE TFC SET tecnologias = SUBSTRING(tecnologias, 1, LEN(tecnologias)-1) WHERE
 --verificar quais os valores que existem nos dados
 SELECT distinct estado FROM Inscricao
 --verificar quais e que sao diferentes dos do enunciado
-SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
+SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Anulado') OR estado IS NULL;
 --contagem de errados 628
-SELECT count(estado) FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
+SELECT count(estado) FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Anulado') OR estado IS NULL;
 --contagem de certos 633
 SELECT count(estado) FROM Inscricao 
 --mapeamento dos estados do enunciados para as colunas incorretas tabela inscricao
@@ -1265,6 +1265,17 @@ BEGIN TRANSACTION TransactionUpdateEstadoInscricao;
 	SELECT distinct estado FROM Inscricao WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
 	SELECT distinct estado FROM Inscricao
 COMMIT TRANSACTION TransactionUpdateEstadoInscricao;
+
+--BEGIN TRANSACTION UpdateEstadoHistoricoTFC;
+--    UPDATE HistoricoTFC SET estado = 'Aguarda Atribuição' WHERE estado = 'A Aguardar Atribuição';
+--    UPDATE HistoricoTFC SET estado = 'Atribuído' WHERE estado = 'Atribuido';
+--    UPDATE HistoricoTFC SET estado = 'Não Atribuído' WHERE estado = 'Não Atribuido';
+--    UPDATE HistoricoTFC SET estado = 'Anulado' WHERE estado IS NULL;
+
+--    --validacao de que os estados tao certos
+--    SELECT distinct estado FROM HistoricoTFC WHERE estado NOT IN ('Aguarda Atribuição', 'Atribuído', 'Não Atribuído', 'Atribuído', 'Anulado') OR estado IS NULL;
+--    SELECT distinct estado FROM HistoricoTFC
+--rollback TRANSACTION UpdateEstadoHistoricoTFC;
 
 GO
 
