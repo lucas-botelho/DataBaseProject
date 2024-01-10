@@ -2,6 +2,7 @@
 --Tiago Mota a22207337
 --Marcos Gil a22102606
 --Gonçalo Neves a22204044
+--Nicolas Santos a22308099
 USE tfc;
 
 --start Q1

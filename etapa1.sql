@@ -1,3 +1,8 @@
+--Lucas Botelho a22201202
+--Tiago Mota a22207337
+--Marcos Gil a22102606
+--Gonçalo Neves a22204044
+--Nicolas Santos a22308099
 -- <> create database <> --
 ---------------------------
 ---------------------------
